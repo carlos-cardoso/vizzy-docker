@@ -1,0 +1,19 @@
+FROM gazebo_nvidia
+
+# Set the working directory to /app
+WORKDIR /ws
+
+# Copy the current directory contents into the container at /app
+#ADD . /ws
+
+
+RUN apt-get update && apt-get -y install cmake libace-dev build-essential git \
+  cmake-curses-gui libeigen3-dev libace-dev libedit-dev\
+  swig \
+  python2.7-dev \
+  qtbase5-dev qtdeclarative5-dev qtmultimedia5-dev \
+  qtdeclarative5-qtquick2-plugin qtdeclarative5-window-plugin \
+  qtdeclarative5-qtmultimedia-plugin qtdeclarative5-controls-plugin \
+  qtdeclarative5-dialogs-plugin libqt5svg5 tmux
+RUN git clone https://github.com/robotology/yarp
+RUN cd yarp && mkdir build && cd build && cmake -DYARP_USE_PYTHON_VERSION=2.7 -DBUILD_SHARED_LIBS=ON -DCREATE_PYTHON=ON -DYARP_COMPILE_BINDINGS=ON -DCREATE_GUIS=ON -DCREATE_LIB_MATH=ON .. && make && make install

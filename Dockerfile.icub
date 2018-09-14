@@ -1,0 +1,22 @@
+FROM yarp
+
+# Set the working directory to /app
+WORKDIR /ws
+
+# Copy the current directory contents into the container at /app
+#ADD . /ws
+
+RUN git clone https://github.com/robotology/icub-gazebo.git
+
+
+RUN git clone https://github.com/robotology/gazebo-yarp-plugins.git
+RUN cd gazebo-yarp-plugins && mkdir build && cd build && cmake -DCMAKE_INSTALL_PREFIX=/ws/local ../&& make && make install
+
+#RUN export GAZEBO_MODEL_PATH=/ws/icub-gazebo
+#RUN export GAZEBO_PLUGIN_PATH=${GAZEBO_PLUGIN_PATH}:/ws/local/lib 
+ENV GAZEBO_MODEL_PATH=/ws/icub-gazebo
+ENV GAZEBO_PLUGIN_PATH=${GAZEBO_PLUGIN_PATH}:/ws/local/lib 
+
+
+# YARP ports management
+#EXPOSE 10000/tcp 10000/udp

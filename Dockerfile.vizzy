@@ -1,0 +1,72 @@
+FROM icub
+
+# Set the working directory to /app
+WORKDIR /ws
+
+# setup environment
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+
+ENV GAZEBO_MODEL_PATH=/ws/icub-gazebo
+ENV GAZEBO_PLUGIN_PATH=${GAZEBO_PLUGIN_PATH}:/ws/local/lib 
+
+RUN /bin/bash -c "source /opt/ros/kinetic/setup.bash && mkdir -p /ws/catkin_ws/src && cd /ws/catkin_ws/ && catkin_make && source devel/setup.bash" 
+
+RUN cd /ws/catkin_ws/src && git clone https://github.com/vislab-tecnico-lisboa/vizzy
+
+
+RUN touch /ws/.bashrc && echo "source /opt/ros/kinetic/setup.bash; \
+source /ws/catkin_ws/devel/setup.bash; \
+export ROS_PACKAGE_PATH=/ws/catkin_ws/src:$ROS_PACKAGE_PATH; \
+export GAZEBO_MODEL_PATH=/ws/icub-gazebo; \
+export GAZEBO_PLUGIN_PATH=${GAZEBO_PLUGIN_PATH}:/ws/local/lib" > /ws/.bashrc
+
+#Install the nav2d package
+RUN version=kinetic && apt-get install -y ros-$version-nav2d
+
+#If you want to run the follower module, download a changed version of the nav2d and place it in your catkin workspace folder
+RUN cd /ws/catkin_ws/src && git clone https://github.com/joao-avelino/navigation_2d.git
+
+# dependencies needed
+RUN version=kinetic && \
+ apt-get install -y ros-$version-gazebo-* && \
+ apt-get install -y ros-$version-image-proc && \
+ apt-get install -y ros-$version-moveit-* && \
+ apt-get install -y ros-$version-opencv* && \
+ apt-get install -y ros-$version-image-proc &&  \
+ apt-get install -y ros-$version-gazebo-ros-control && \
+ apt-get install -y ros-$version-move-base && \
+ apt-get install -y ros-$version-amcl && \
+ apt-get install -y ros-$version-joy && \
+ apt-get install -y ros-$version-map-server && \
+ apt-get install -y ros-$version-joint-state-controller && \
+ apt-get install -y ros-$version-velocity-controllers && \
+ apt-get install -y ros-$version-position-controllers && \
+ apt-get install -y ros-$version-joint-trajectory-controller && \
+ apt-get install -y ros-$version-eband-local-planner && \
+ apt-get install -y ros-$version-laser-filters && \
+ apt-get install -y libsuitesparse-dev && \
+ apt-get install -y ros-$version-fake-localization && \
+ apt-get install -y ros-$version-move-slow-and-clear 
+
+RUN /bin/bash -c "source /ws/.bashrc && cd /ws/catkin_ws && catkin_make --pkg vizzy_msgs && catkin_make --pkg id_selector && catkin_make"
+
+#Create a user
+#RUN useradd -ms /bin/bash   -d /ws dkvizzy
+
+#USER dkvizzy
+WORKDIR /ws
+
+
+#Fix for an issue where yarp detect under docker creates a directory yarp.conf instead of the file 
+RUN rm -r /ws/.config/yarp/yarp.conf || echo ""
+RUN mkdir -p /ws/.config/yarp && touch /ws/.config/yarp/yarp.conf &&  echo "172.17.0.1 10000 yarp" > /ws/.config/yarp/yarp.conf
+
+# YARP ports management
+#EXPOSE 10000/tcp 10000/udp
+
+# Some QT-Apps/Gazebo don't show controls without this
+ENV QT_X11_NO_MITSHM 1
+
+# Copy the current directory contents into the container at /app
+ADD . /ws
