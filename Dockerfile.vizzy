@@ -15,10 +15,10 @@ RUN /bin/bash -c "source /opt/ros/kinetic/setup.bash && mkdir -p /ws/catkin_ws/s
 RUN cd /ws/catkin_ws/src && git clone https://github.com/vislab-tecnico-lisboa/vizzy
 
 
-RUN touch /ws/.bashrc && echo "source /opt/ros/kinetic/setup.bash; \
-source /ws/catkin_ws/devel/setup.bash; \
-export ROS_PACKAGE_PATH=/ws/catkin_ws/src:$ROS_PACKAGE_PATH; \
-export GAZEBO_MODEL_PATH=/ws/icub-gazebo; \
+#export ROS_PACKAGE_PATH=/ws/catkin_ws/src:$ROS_PACKAGE_PATH; \n\
+RUN touch /ws/.bashrc && echo "source /opt/ros/kinetic/setup.bash; \n\
+source /ws/catkin_ws/devel/setup.bash; \n\
+export GAZEBO_MODEL_PATH=/ws/icub-gazebo; \n\
 export GAZEBO_PLUGIN_PATH=${GAZEBO_PLUGIN_PATH}:/ws/local/lib" > /ws/.bashrc
 
 #Install the nav2d package
@@ -57,6 +57,7 @@ RUN /bin/bash -c "source /ws/.bashrc && cd /ws/catkin_ws && catkin_make --pkg vi
 #USER dkvizzy
 WORKDIR /ws
 
+RUN cp .bashrc $HOME/.bashrc
 
 #Fix for an issue where yarp detect under docker creates a directory yarp.conf instead of the file 
 RUN rm -r /ws/.config/yarp/yarp.conf || echo ""

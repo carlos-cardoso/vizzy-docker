@@ -1,0 +1,30 @@
+FROM vizzy
+
+#Enable VizzyArmCommand
+
+RUN ["/bin/bash", "-c", "cd /ws/catkin_ws/src &&\
+ git clone https://github.com/vislab-tecnico-lisboa/vizzy_tactile_drivers.git && \
+ cd .. && source /opt/ros/kinetic/setup.bash && \
+ source /ws/catkin_ws/devel/setup.bash && \
+ catkin_make"]
+
+RUN ["/bin/bash", "-c", "source /opt/ros/kinetic/setup.bash && \
+ source /ws/catkin_ws/devel/setup.bash && \
+ cd /ws/catkin_ws/src/vizzy/vizzy_yarp_icub/src/modules/armGesture/include && \
+ yarpidl_rosmsg --out . Int16 && \
+ yarpidl_rosmsg --out .  TactSensorArray && \
+ cd ../ && \
+ mkdir build && \
+ cd build && \
+ cmake .. && \
+ make && \
+ cp VizzyArmRoutines /usr/local/bin/VizzyArmRoutines"]
+
+#basic tools
+ RUN apt-get -y install tmux ranger vim
+
+
+#roscore
+#yarpserver --ros
+#roslaunch vizzy_launch vizzy_simulation.launch use_yarp:=true
+#VizzyArmRoutines --robot vizzySim

@@ -20,6 +20,6 @@ docker run --runtime=nvidia -it --rm \
 -e LOCAL_USER_ID=`id -u $USER` \
 -e LOCAL_GROUP_ID=`id -g $USER` \
 -e LOCAL_GROUP_NAME=`id -gn $USER` \
- vizzy bash
+ vizzy_armroutines bash
 
 xhost -local:root
